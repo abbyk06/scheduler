@@ -1,0 +1,64 @@
+import os
+from fastapi import FastAPI, UploadFile, File
+from google import genai
+from google.genai import types
+from pydantic import BaseModel
+from typing import List
+from dotenv import load_dotenv
+
+load_dotenv()
+
+class TimeSlot(BaseModel):
+    day: str
+    start_time: str
+    end_time: str
+
+class Schedule(BaseModel):
+    student_name: str
+    busy_slots: List[TimeSlot]
+
+app = FastAPI()
+# 1. Clean initialization (no version forcing)
+client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+
+
+# This will act as our temporary database
+# Format: {"Abby": [TimeSlot, TimeSlot], "Daniel": [TimeSlot]}
+database = {}
+
+@app.post("/scan")
+async def scan_schedule(employee_name: str, file: UploadFile = File(...)):
+    print(f"--- Scanning schedule for: {employee_name} ---")
+    try:
+        image_bytes = await file.read()
+        
+        response = client.models.generate_content(
+            model="gemini-2.5-flash", # Use the model that worked for you!
+            contents=[
+                "Extract all busy class times from this schedule. Output ONLY JSON.",
+                types.Part.from_bytes(data=image_bytes, mime_type=file.content_type)
+            ],
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+                response_schema=Schedule,
+            )
+        )
+
+        # Parse the JSON from Gemini
+        scanned_data = Schedule.model_validate_json(response.text)
+        
+        # Save to our "database" using the name provided in the input
+        database[employee_name] = scanned_data.busy_slots
+        
+        return {
+            "message": f"Schedule saved for {employee_name}",
+            "currently_stored_employees": list(database.keys()),
+            "data": scanned_data
+        }
+
+    except Exception as e:
+        return {"error": str(e)}
+
+@app.get("/employees")
+async def get_all_schedules():
+    return database
