@@ -1,7 +1,6 @@
 "use client";
 import dynamic from 'next/dynamic';
 
-// We import the component dynamically and disable Server-Side Rendering (ssr)
 const ScheduleViewer = dynamic(() => import('@/components/ScheduleViewer'), { 
   ssr: false,
   loading: () => <p>Loading Calendar...</p> 
@@ -14,3 +13,4 @@ export default function Home() {
     </main>
   );
 }
+

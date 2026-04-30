@@ -66,3 +66,10 @@ async def scan_schedule(employee_name: str, file: UploadFile = File(...)):
 @app.get("/employees")
 async def get_all_schedules():
     return database
+
+@app.delete("/employees/{name}")
+async def delete_employee(name: str):
+    if name in database:
+        del database[name]
+        return {"message": f"Deleted {name}"}
+    return {"error": "Not found"}
