@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "@fullcalendar/common": "^5.11.5",
+    "@fullcalendar/react": "^6.1.20",
+    "@fullcalendar/timegrid": "^6.1.20"
+  }
+}

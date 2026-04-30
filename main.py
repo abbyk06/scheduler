@@ -18,12 +18,8 @@ class Schedule(BaseModel):
     busy_slots: List[TimeSlot]
 
 app = FastAPI()
-# 1. Clean initialization (no version forcing)
 client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
 
-
-# This will act as our temporary database
-# Format: {"Abby": [TimeSlot, TimeSlot], "Daniel": [TimeSlot]}
 database = {}
 
 @app.post("/scan")
@@ -33,7 +29,7 @@ async def scan_schedule(employee_name: str, file: UploadFile = File(...)):
         image_bytes = await file.read()
         
         response = client.models.generate_content(
-            model="gemini-2.5-flash", # Use the model that worked for you!
+            model="gemini-2.5-flash",
             contents=[
                 "Extract all busy class times from this schedule. Output ONLY JSON.",
                 types.Part.from_bytes(data=image_bytes, mime_type=file.content_type)
@@ -44,10 +40,8 @@ async def scan_schedule(employee_name: str, file: UploadFile = File(...)):
             )
         )
 
-        # Parse the JSON from Gemini
         scanned_data = Schedule.model_validate_json(response.text)
         
-        # Save to our "database" using the name provided in the input
         database[employee_name] = scanned_data.busy_slots
         
         return {
