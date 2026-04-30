@@ -1,5 +1,6 @@
 import os
 from fastapi import FastAPI, UploadFile, File
+from fastapi.middleware.cors import CORSMiddleware
 from google import genai
 from google.genai import types
 from pydantic import BaseModel
@@ -18,6 +19,15 @@ class Schedule(BaseModel):
     busy_slots: List[TimeSlot]
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"], # Allow your React app
+    allow_credentials=True,
+    allow_methods=["*"], # Allow POST, GET, etc.
+    allow_headers=["*"], # Allow all headers
+)
+
 client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
 
 database = {}
