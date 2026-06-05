@@ -1,7 +1,9 @@
 ## Employee Schedule Planner :)
 run `pip install -r requirements.txt`
 
-`python main.py`
+enable `python terminal use env file`
+
+`uvicorn main:app`
   
 `cd scheduler` in a new terminal
 
