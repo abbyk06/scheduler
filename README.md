@@ -8,6 +8,6 @@ enable `python terminal use env file`
 `cd scheduler` in a new terminal
 
 `npm run dev`
-  
 
+Open on [localhost:3000](http://localhost:3000)
 
